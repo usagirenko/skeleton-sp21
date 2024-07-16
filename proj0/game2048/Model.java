@@ -109,7 +109,32 @@ public class Model extends Observable {
     public boolean tilt(Side side) {
         boolean changed;
         changed = false;
-
+        int size = this.board.size();
+        boolean [][] ismerged = new boolean[size][size];
+        this.board.setViewingPerspective(side);
+        for(int i = size-1; i >= 0; i--) {
+            for(int j = size-2; j >= 0; j--) {
+                Tile t = this.board.tile(i, j);
+                if(t==null){
+                    continue;
+                }
+                int y = j;
+                while(y+1<size && this.board.tile(i,y+1)==null){
+                    y++;
+                    changed = true;
+                }
+                if (y+1<size && this.board.tile(i, y + 1).value() == t.value() && !ismerged[i][y]) {
+                    this.board.move(i, y + 1, t);
+                    changed = true;
+                    ismerged[i][y] = true;
+                    this.score += this.board.tile(i, y + 1).value();
+                }
+                else {
+                    this.board.move(i, y, t);
+                }
+            }
+        }
+        this.board.setViewingPerspective(Side.NORTH);
         // TODO: Modify this.board (and perhaps this.score) to account
         // for the tilt to the Side SIDE. If the board changed, set the
         // changed local variable to true.
@@ -137,6 +162,14 @@ public class Model extends Observable {
      *  Empty spaces are stored as null.
      * */
     public static boolean emptySpaceExists(Board b) {
+        int size = b.size();
+        for(int i = 0; i<size; i++){
+            for (int j=0; j<size; j++){
+                if(b.tile(i,j)==null){
+                    return true;
+                }
+            }
+        }
         // TODO: Fill in this function.
         return false;
     }
@@ -147,6 +180,17 @@ public class Model extends Observable {
      * given a Tile object t, we get its value with t.value().
      */
     public static boolean maxTileExists(Board b) {
+        int size = b.size();
+        for(int i = 0; i<size; i++){
+            for (int j=0; j<size; j++){
+                if(b.tile(i,j)==null){
+                    continue;
+                }
+                if(b.tile(i,j).value()==MAX_PIECE){
+                    return true;
+                }
+            }
+        }
         // TODO: Fill in this function.
         return false;
     }
@@ -158,6 +202,60 @@ public class Model extends Observable {
      * 2. There are two adjacent tiles with the same value.
      */
     public static boolean atLeastOneMoveExists(Board b) {
+        int size = b.size();
+        for(int i = 0; i<size; i++){
+            for (int j=0; j<size; j++){
+                 Tile t = b.tile(i,j);
+                if(t==null){
+                    return true;
+                }
+//                if(i-1!=-1 &&  b.tile(i-1,j).value()==t.value()){
+//                    return true;
+//                }
+//                if(i+1!=size && b.tile(i+1,j).value()==t.value()){
+//                    return true;
+//                }
+//                if(j-1!=-1 &&  b.tile(i,j-1).value()==t.value()) {
+//                    return true;
+//                }
+//                if(j+1!=size &&  b.tile(i,j+1).value()==t.value()) {
+//                    return true;
+//                }
+//            }
+//        }
+                // Check top neighbor
+                if (i > 0) {
+                    Tile top = b.tile(i - 1, j);
+                    if (top == null || top.value() == t.value()) {
+                        return true;
+                    }
+                }
+
+                // Check bottom neighbor
+                if (i < size - 1) {
+                    Tile bottom = b.tile(i + 1, j);
+                    if (bottom == null || bottom.value() == t.value()) {
+                        return true;
+                    }
+                }
+
+                // Check left neighbor
+                if (j > 0) {
+                    Tile left = b.tile(i, j - 1);
+                    if (left == null || left.value() == t.value()) {
+                        return true;
+                    }
+                }
+
+                // Check right neighbor
+                if (j < size - 1) {
+                    Tile right = b.tile(i, j + 1);
+                    if (right == null || right.value() == t.value()) {
+                        return true;
+                    }
+                }
+            }
+        }
         // TODO: Fill in this function.
         return false;
     }
